@@ -1,0 +1,20 @@
+{
+    "appId": "com.ims.pos",
+    "productName": "Inventory POS System",
+    "directories": {
+        "output": "release"
+    },
+    "files": [
+        "dist/**/*",
+        "dist-electron/**/*",
+        "package.json"
+    ],
+    "win": {
+        "target": "nsis",
+        "forceCodeSigning": false
+    },
+    "nsis": {
+        "oneClick": false,
+        "allowToChangeInstallationDirectory": true
+    }
+}
