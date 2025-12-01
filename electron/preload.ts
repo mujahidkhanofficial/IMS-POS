@@ -26,6 +26,8 @@ contextBridge.exposeInMainWorld('electron', {
         validateKey: (key: string) => ipcRenderer.invoke('license:validate-key', key),
         saveKey: (key: string) => ipcRenderer.invoke('license:save-key', key),
         check: () => ipcRenderer.invoke('license:check'),
+        getStatus: () => ipcRenderer.invoke('license:getStatus'),
+        submit: (key: string) => ipcRenderer.invoke('license:submit', key),
     },
     db: {
         products: {
@@ -36,6 +38,16 @@ contextBridge.exposeInMainWorld('electron', {
             delete: (id: number) => ipcRenderer.invoke('db:products:delete', id),
             adjustStock: (id: number, quantity: number, reason: string) => ipcRenderer.invoke('db:products:adjustStock', { id, quantity, reason }),
         },
+        suppliers: {
+            getAll: () => ipcRenderer.invoke('db:suppliers:getAll'),
+            create: (supplier: any) => ipcRenderer.invoke('db:suppliers:create', supplier),
+            update: (supplier: any) => ipcRenderer.invoke('db:suppliers:update', supplier),
+            delete: (id: number) => ipcRenderer.invoke('db:suppliers:delete', id),
+        },
+        purchases: {
+            getAll: () => ipcRenderer.invoke('db:purchases:getAll'),
+            create: (purchase: any) => ipcRenderer.invoke('db:purchases:create', purchase),
+        },
         reports: {
             getDashboardData: () => ipcRenderer.invoke('db:reports:dashboard'),
             getSalesReport: (range: { startDate: string, endDate: string }) => ipcRenderer.invoke('db:reports:sales', range),
@@ -45,5 +57,15 @@ contextBridge.exposeInMainWorld('electron', {
     },
     backup: {
         create: () => ipcRenderer.invoke('backup:create'),
+        manual: () => ipcRenderer.invoke('backup:manual'),
+        openFolder: () => ipcRenderer.invoke('backup:openFolder'),
+    },
+    settings: {
+        get: () => ipcRenderer.invoke('settings:get'),
+        update: (settings: any) => ipcRenderer.invoke('settings:update', settings),
+    },
+    printer: {
+        getPrinters: () => ipcRenderer.invoke('print:getPrinters'),
+        printReceipt: (data: any) => ipcRenderer.invoke('print:receipt', data),
     },
 });

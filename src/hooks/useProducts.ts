@@ -37,11 +37,17 @@ export function useProducts() {
     };
 
     const createProduct = async (product: Omit<Product, 'id'>) => {
+        console.log('[useProducts] Creating product:', product);
         const result = await window.electron.db.products.create(product);
+        console.log('[useProducts] Create result:', result);
         if (result.success) {
-            setProducts(prev => [...prev, result.data]);
+            setProducts(prev => {
+                console.log('[useProducts] Updating state with:', result.data);
+                return [...prev, result.data];
+            });
             return true;
         }
+        console.error('[useProducts] Create failed:', result.error);
         return false;
     };
 

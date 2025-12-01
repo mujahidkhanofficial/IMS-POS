@@ -73,8 +73,25 @@ export default function POS() {
 
         // 3. Print Receipt
         try {
-            await window.electron.ipcRenderer.invoke('print:receipt', {
-                ...invoice,
+            // Fetch store settings for receipt header
+            const settingsResult = await window.electron.settings.get();
+            const settings = settingsResult.success && settingsResult.data
+                ? settingsResult.data.reduce((acc: any, curr: any) => ({ ...acc, [curr.key]: curr.value }), {})
+                : {};
+
+            await window.electron.printer.printReceipt({
+                printerName: settings.printer_name,
+                width: settings.printer_width,
+                storeName: settings.store_name || 'My Store',
+                address: settings.store_address || '',
+                invoiceNumber: `INV-${Date.now()}`, // Temporary ID generation
+                date: new Date().toISOString(),
+                items: cart.map(item => ({
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price_sell
+                })),
+                total: totals.total,
                 amount_received: amountReceived,
                 change: amountReceived - totals.total
             });

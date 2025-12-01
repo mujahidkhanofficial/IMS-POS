@@ -27,6 +27,33 @@ electron_1.contextBridge.exposeInMainWorld('electron', {
         validateKey: (key) => electron_1.ipcRenderer.invoke('license:validate-key', key),
         saveKey: (key) => electron_1.ipcRenderer.invoke('license:save-key', key),
         check: () => electron_1.ipcRenderer.invoke('license:check'),
+        getStatus: () => electron_1.ipcRenderer.invoke('license:getStatus'),
+        submit: (key) => electron_1.ipcRenderer.invoke('license:submit', key),
+    },
+    db: {
+        products: {
+            getAll: () => electron_1.ipcRenderer.invoke('db:products:getAll'),
+            search: (query) => electron_1.ipcRenderer.invoke('db:products:search', query),
+            create: (product) => electron_1.ipcRenderer.invoke('db:products:create', product),
+            update: (product) => electron_1.ipcRenderer.invoke('db:products:update', product),
+            delete: (id) => electron_1.ipcRenderer.invoke('db:products:delete', id),
+            adjustStock: (id, quantity, reason) => electron_1.ipcRenderer.invoke('db:products:adjustStock', { id, quantity, reason }),
+        },
+        reports: {
+            getDashboardData: () => electron_1.ipcRenderer.invoke('db:reports:dashboard'),
+            getSalesReport: (range) => electron_1.ipcRenderer.invoke('db:reports:sales', range),
+            getLowStockReport: () => electron_1.ipcRenderer.invoke('db:reports:low-stock'),
+            exportCSV: (data, filename) => electron_1.ipcRenderer.invoke('db:reports:export-csv', { data, filename }),
+        },
+    },
+    backup: {
+        create: () => electron_1.ipcRenderer.invoke('backup:create'),
+        manual: () => electron_1.ipcRenderer.invoke('backup:manual'),
+        openFolder: () => electron_1.ipcRenderer.invoke('backup:openFolder'),
+    },
+    settings: {
+        get: () => electron_1.ipcRenderer.invoke('settings:get'),
+        update: (settings) => electron_1.ipcRenderer.invoke('settings:update', settings),
     },
 });
 //# sourceMappingURL=preload.js.map

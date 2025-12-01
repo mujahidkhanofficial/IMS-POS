@@ -20,6 +20,8 @@ interface Window {
             validateKey: (key: string) => Promise<boolean>;
             saveKey: (key: string) => Promise<boolean>;
             check: () => Promise<boolean>;
+            getStatus: () => Promise<{ licensed: boolean; machineId: string }>;
+            submit: (key: string) => Promise<boolean>;
         };
         db: {
             products: {
@@ -30,6 +32,16 @@ interface Window {
                 delete: (id: number) => Promise<{ success: boolean; data?: boolean; error?: string }>;
                 adjustStock: (id: number, quantity: number, reason: string) => Promise<{ success: boolean; data?: number; error?: string }>;
             };
+            suppliers: {
+                getAll: () => Promise<{ success: boolean; data?: any[]; error?: string }>;
+                create: (supplier: any) => Promise<{ success: boolean; data?: any; error?: string }>;
+                update: (supplier: any) => Promise<{ success: boolean; data?: any; error?: string }>;
+                delete: (id: number) => Promise<{ success: boolean; data?: boolean; error?: string }>;
+            };
+            purchases: {
+                getAll: () => Promise<{ success: boolean; data?: any[]; error?: string }>;
+                create: (purchase: any) => Promise<{ success: boolean; data?: any; error?: string }>;
+            };
             reports: {
                 getDashboardData: () => Promise<{ success: boolean; data?: any; error?: string }>;
                 getSalesReport: (range: { startDate: string, endDate: string }) => Promise<{ success: boolean; data?: any[]; error?: string }>;
@@ -39,6 +51,16 @@ interface Window {
         };
         backup: {
             create: () => Promise<{ success: boolean; path?: string; error?: string }>;
+            manual: () => Promise<{ success: boolean; path?: string; error?: string }>;
+            openFolder: () => Promise<boolean>;
+        };
+        settings: {
+            get: () => Promise<{ success: boolean; data?: any[]; error?: string }>;
+            update: (settings: any) => Promise<{ success: boolean; data?: any; error?: string }>;
+        };
+        printer: {
+            getPrinters: () => Promise<any[]>;
+            printReceipt: (data: any) => Promise<{ success: boolean; error?: string }>;
         };
     };
 }

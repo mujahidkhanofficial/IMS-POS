@@ -24,6 +24,7 @@ export default function Inventory() {
         stock_qty: 0,
         min_stock_level: 5,
         category: '',
+        brand: '',
     });
 
     const filteredProducts = products.filter(p =>
@@ -47,6 +48,7 @@ export default function Inventory() {
                 stock_qty: 0,
                 min_stock_level: 5,
                 category: '',
+                brand: '',
             });
         }
         setIsModalOpen(true);
@@ -158,39 +160,45 @@ export default function Inventory() {
                                 <Label>Product Name</Label>
                                 <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                             </div>
-                            <div className="space-y-2">
-                                <Label>Category</Label>
-                                <Input value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Category</Label>
+                                    <Input value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Brand</Label>
+                                    <Input value={formData.brand} onChange={(e) => setFormData({ ...formData, brand: e.target.value })} />
+                                </div>
                             </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>SKU</Label>
-                                <Input value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>SKU</Label>
+                                    <Input value={formData.sku} onChange={(e) => setFormData({ ...formData, sku: e.target.value })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Barcode</Label>
+                                    <Input value={formData.barcode} onChange={(e) => setFormData({ ...formData, barcode: e.target.value })} />
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label>Barcode</Label>
-                                <Input value={formData.barcode} onChange={(e) => setFormData({ ...formData, barcode: e.target.value })} />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Cost Price</Label>
+                                    <Input type="number" value={formData.price_cost} onChange={(e) => setFormData({ ...formData, price_cost: parseFloat(e.target.value) })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Selling Price</Label>
+                                    <Input type="number" value={formData.price_sell} onChange={(e) => setFormData({ ...formData, price_sell: parseFloat(e.target.value) })} />
+                                </div>
                             </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Cost Price</Label>
-                                <Input type="number" value={formData.price_cost} onChange={(e) => setFormData({ ...formData, price_cost: parseFloat(e.target.value) })} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Selling Price</Label>
-                                <Input type="number" value={formData.price_sell} onChange={(e) => setFormData({ ...formData, price_sell: parseFloat(e.target.value) })} />
-                            </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Initial Stock</Label>
-                                <Input type="number" value={formData.stock_qty} onChange={(e) => setFormData({ ...formData, stock_qty: parseInt(e.target.value) })} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Min Stock Level</Label>
-                                <Input type="number" value={formData.min_stock_level} onChange={(e) => setFormData({ ...formData, min_stock_level: parseInt(e.target.value) })} />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Initial Stock</Label>
+                                    <Input type="number" value={formData.stock_qty} onChange={(e) => setFormData({ ...formData, stock_qty: parseInt(e.target.value) })} />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Min Stock Level</Label>
+                                    <Input type="number" value={formData.min_stock_level} onChange={(e) => setFormData({ ...formData, min_stock_level: parseInt(e.target.value) })} />
+                                </div>
                             </div>
                         </div>
                     </div>

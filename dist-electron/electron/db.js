@@ -27,6 +27,18 @@ function initializeDatabase() {
         db.pragma('foreign_keys = ON');
         // Execute Schema
         db.exec(schema_1.schema);
+        // Migrations: Check for missing columns in existing tables
+        try {
+            const tableInfo = db.pragma('table_info(products)');
+            const hasBrand = tableInfo.some(col => col.name === 'brand');
+            if (!hasBrand) {
+                console.log('Migrating: Adding brand column to products table...');
+                db.prepare('ALTER TABLE products ADD COLUMN brand TEXT').run();
+            }
+        }
+        catch (err) {
+            console.error('Migration failed:', err);
+        }
         // Initialize Default Settings
         const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
         const insertMany = db.transaction((settings) => {

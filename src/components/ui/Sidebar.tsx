@@ -8,6 +8,8 @@ import {
     Settings,
     Menu,
     ChevronLeft,
+    Truck,
+    Import,
     LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -22,6 +24,8 @@ export function Sidebar() {
         { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
         { icon: ShoppingCart, label: 'POS', path: '/pos' },
         { icon: Package, label: 'Inventory', path: '/inventory' },
+        { icon: Truck, label: 'Suppliers', path: '/suppliers' },
+        { icon: Import, label: 'Stock In', path: '/purchase-entry' },
         { icon: FileBarChart, label: 'Reports', path: '/reports' },
         { icon: Settings, label: 'Settings', path: '/settings' },
     ];

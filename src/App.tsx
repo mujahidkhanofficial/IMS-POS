@@ -1,68 +1,54 @@
-import { useState, useEffect } from 'react';
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from '@/layouts/AppLayout';
+import Dashboard from '@/pages/Dashboard';
+import Inventory from '@/pages/Inventory';
+import POS from '@/pages/POS';
+import Reports from '@/pages/Reports';
+import Settings from '@/pages/Settings';
 import Activate from '@/pages/Activate';
-import { Loader2 } from 'lucide-react';
+import Suppliers from '@/pages/Suppliers';
+import PurchaseEntry from '@/pages/PurchaseEntry';
+import { useLicense } from '@/hooks/useLicense';
 import { ThemeProvider } from '@/components/theme-provider';
 
-import POS from '@/pages/POS';
-import Dashboard from '@/pages/Dashboard';
-import Reports from '@/pages/Reports';
-import Inventory from '@/pages/Inventory';
-
-// Placeholder Pages
-const Settings = () => <div className="text-2xl font-bold">Settings</div>;
-
 function App() {
-    const [isChecking, setIsChecking] = useState(true);
-    const [isActivated, setIsActivated] = useState(false);
+    const { isLicensed, loading } = useLicense();
 
-    useEffect(() => {
-        const checkLicense = async () => {
-            try {
-                const valid = await window.electron.license.check();
-                setIsActivated(valid);
-            } catch (error) {
-                console.error('License check failed:', error);
-                setIsActivated(false);
-            } finally {
-                setIsChecking(false);
-            }
-        };
-        checkLicense();
-    }, []);
+    if (loading) {
+        return (
+            <div className="flex h-screen w-screen items-center justify-center bg-background text-foreground">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                    <p className="text-muted-foreground">Initializing System...</p>
+                </div>
+            </div>
+        );
+    }
 
-    if (isChecking) {
+    if (!isLicensed) {
         return (
             <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-                <div className="h-screen w-screen flex items-center justify-center bg-background text-foreground">
-                    <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-                </div>
+                <Activate />
             </ThemeProvider>
         );
     }
 
     return (
         <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-            <HashRouter>
+            <Router>
                 <Routes>
-                    {!isActivated ? (
-                        <>
-                            <Route path="/activate" element={<Activate />} />
-                            <Route path="*" element={<Navigate to="/activate" replace />} />
-                        </>
-                    ) : (
-                        <Route element={<AppLayout />}>
-                            <Route path="/" element={<Dashboard />} />
-                            <Route path="/pos" element={<POS />} />
-                            <Route path="/inventory" element={<Inventory />} />
-                            <Route path="/reports" element={<Reports />} />
-                            <Route path="/settings" element={<Settings />} />
-                            <Route path="/activate" element={<Navigate to="/" replace />} />
-                        </Route>
-                    )}
+                    <Route element={<AppLayout />}>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/inventory" element={<Inventory />} />
+                        <Route path="/pos" element={<POS />} />
+                        <Route path="/reports" element={<Reports />} />
+                        <Route path="/settings" element={<Settings />} />
+                        <Route path="/suppliers" element={<Suppliers />} />
+                        <Route path="/purchase-entry" element={<PurchaseEntry />} />
+                    </Route>
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
-            </HashRouter>
+            </Router>
         </ThemeProvider>
     );
 }

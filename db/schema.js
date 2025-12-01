@@ -77,29 +77,6 @@ exports.schema = `
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(product_id) REFERENCES products(id)
   );
-
-  -- Purchases Table
-  CREATE TABLE IF NOT EXISTS purchases (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    supplier_id INTEGER,
-    invoice_number TEXT,
-    total_amount REAL DEFAULT 0,
-    date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY(supplier_id) REFERENCES suppliers(id)
-  );
-
-  -- Purchase Items Table
-  CREATE TABLE IF NOT EXISTS purchase_items (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    purchase_id INTEGER,
-    product_id INTEGER,
-    quantity INTEGER,
-    unit_cost REAL,
-    total REAL,
-    FOREIGN KEY(purchase_id) REFERENCES purchases(id),
-    FOREIGN KEY(product_id) REFERENCES products(id)
-  );
 `;
 exports.defaultSettings = [
     { key: 'store_name', value: 'My Store' },

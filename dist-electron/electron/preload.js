@@ -27,6 +27,8 @@ electron_1.contextBridge.exposeInMainWorld('electron', {
         validateKey: (key) => electron_1.ipcRenderer.invoke('license:validate-key', key),
         saveKey: (key) => electron_1.ipcRenderer.invoke('license:save-key', key),
         check: () => electron_1.ipcRenderer.invoke('license:check'),
+        getStatus: () => electron_1.ipcRenderer.invoke('license:getStatus'),
+        submit: (key) => electron_1.ipcRenderer.invoke('license:submit', key),
     },
     db: {
         products: {
@@ -37,6 +39,16 @@ electron_1.contextBridge.exposeInMainWorld('electron', {
             delete: (id) => electron_1.ipcRenderer.invoke('db:products:delete', id),
             adjustStock: (id, quantity, reason) => electron_1.ipcRenderer.invoke('db:products:adjustStock', { id, quantity, reason }),
         },
+        suppliers: {
+            getAll: () => electron_1.ipcRenderer.invoke('db:suppliers:getAll'),
+            create: (supplier) => electron_1.ipcRenderer.invoke('db:suppliers:create', supplier),
+            update: (supplier) => electron_1.ipcRenderer.invoke('db:suppliers:update', supplier),
+            delete: (id) => electron_1.ipcRenderer.invoke('db:suppliers:delete', id),
+        },
+        purchases: {
+            getAll: () => electron_1.ipcRenderer.invoke('db:purchases:getAll'),
+            create: (purchase) => electron_1.ipcRenderer.invoke('db:purchases:create', purchase),
+        },
         reports: {
             getDashboardData: () => electron_1.ipcRenderer.invoke('db:reports:dashboard'),
             getSalesReport: (range) => electron_1.ipcRenderer.invoke('db:reports:sales', range),
@@ -46,6 +58,12 @@ electron_1.contextBridge.exposeInMainWorld('electron', {
     },
     backup: {
         create: () => electron_1.ipcRenderer.invoke('backup:create'),
+        manual: () => electron_1.ipcRenderer.invoke('backup:manual'),
+        openFolder: () => electron_1.ipcRenderer.invoke('backup:openFolder'),
+    },
+    settings: {
+        get: () => electron_1.ipcRenderer.invoke('settings:get'),
+        update: (settings) => electron_1.ipcRenderer.invoke('settings:update', settings),
     },
 });
 //# sourceMappingURL=preload.js.map
