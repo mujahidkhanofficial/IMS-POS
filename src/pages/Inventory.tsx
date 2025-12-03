@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useVirtualizer } from '@tanstack/react-virtual';
+import { useDebounce } from '@/hooks/useDebounce';
 import { useProducts } from '@/hooks/useProducts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +13,10 @@ import { Product } from '@/types';
 export default function Inventory() {
     const { products, loading, deleteProduct, createProduct, updateProduct } = useProducts();
     const [searchQuery, setSearchQuery] = useState('');
+    const debouncedSearch = useDebounce(searchQuery, 300);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const parentRef = useRef<HTMLDivElement>(null);
 
     // Form State
     const [formData, setFormData] = useState<Partial<Product>>({
@@ -28,10 +32,17 @@ export default function Inventory() {
     });
 
     const filteredProducts = products.filter(p =>
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.sku.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.barcode?.includes(searchQuery)
+        p.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        p.sku.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        p.barcode?.includes(debouncedSearch)
     );
+
+    const rowVirtualizer = useVirtualizer({
+        count: filteredProducts.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 53, // Approximate row height
+        overscan: 5,
+    });
 
     const handleOpenModal = (product?: Product) => {
         if (product) {
@@ -74,15 +85,15 @@ export default function Inventory() {
     };
 
     return (
-        <div className="p-6 space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="p-6 space-y-6 h-screen flex flex-col">
+            <div className="flex justify-between items-center shrink-0">
                 <h1 className="text-3xl font-bold tracking-tight">Inventory Management</h1>
                 <Button onClick={() => handleOpenModal()} className="bg-indigo-600 hover:bg-indigo-700">
                     <Plus className="w-4 h-4 mr-2" /> Add Product
                 </Button>
             </div>
 
-            <div className="flex items-center space-x-2 bg-card/50 p-2 rounded-lg border border-indigo-500/20 backdrop-blur-sm">
+            <div className="flex items-center space-x-2 bg-zinc-900 p-2 rounded-md border border-border shrink-0">
                 <Search className="w-5 h-5 text-muted-foreground" />
                 <Input
                     placeholder="Search by name, SKU, or barcode..."
@@ -92,11 +103,14 @@ export default function Inventory() {
                 />
             </div>
 
-            <div className="rounded-md border bg-card/50 backdrop-blur-sm">
+            <div
+                ref={parentRef}
+                className="rounded-md border border-border bg-zinc-900 overflow-auto flex-1"
+            >
                 <Table>
-                    <TableHeader>
+                    <TableHeader className="sticky top-0 bg-zinc-900 z-10">
                         <TableRow>
-                            <TableHead>Name</TableHead>
+                            <TableHead className="w-[300px]">Name</TableHead>
                             <TableHead>SKU</TableHead>
                             <TableHead>Category</TableHead>
                             <TableHead className="text-right">Cost</TableHead>
@@ -105,7 +119,12 @@ export default function Inventory() {
                             <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
-                    <TableBody>
+                    <TableBody
+                        style={{
+                            height: `${rowVirtualizer.getTotalSize()}px`,
+                            position: 'relative'
+                        }}
+                    >
                         {loading ? (
                             <TableRow>
                                 <TableCell colSpan={7} className="text-center h-24">Loading products...</TableCell>
@@ -117,33 +136,50 @@ export default function Inventory() {
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            filteredProducts.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell className="font-medium">
-                                        <div className="flex items-center">
-                                            <Package className="w-4 h-4 mr-2 text-indigo-500" />
-                                            {product.name}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="font-mono text-xs">{product.sku}</TableCell>
-                                    <TableCell>{product.category}</TableCell>
-                                    <TableCell className="text-right">${product.price_cost.toFixed(2)}</TableCell>
-                                    <TableCell className="text-right font-bold">${product.price_sell.toFixed(2)}</TableCell>
-                                    <TableCell className="text-right">
-                                        <span className={product.stock_qty <= product.min_stock_level ? "text-red-500 font-bold" : "text-green-500"}>
-                                            {product.stock_qty}
-                                        </span>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => handleOpenModal(product)}>
-                                            <Edit className="w-4 h-4" />
-                                        </Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(product.id)}>
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))
+                            rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                                const product = filteredProducts[virtualRow.index];
+                                return (
+                                    <TableRow
+                                        key={product.id}
+                                        style={{
+                                            height: `${virtualRow.size}px`,
+                                            transform: `translateY(${virtualRow.start}px)`,
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            width: '100%',
+                                            display: 'flex',
+                                            alignItems: 'center'
+                                        }}
+                                    >
+                                        <TableCell className="font-medium w-[300px] flex-none">
+                                            <div className="flex items-center">
+                                                <Package className="w-4 h-4 mr-2 text-indigo-500" />
+                                                <span className="truncate">{product.name}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="font-mono text-xs flex-1">{product.sku}</TableCell>
+                                        <TableCell className="flex-1">{product.category}</TableCell>
+                                        <TableCell className="text-right flex-1">${product.price_cost.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right font-bold flex-1">${product.price_sell.toFixed(2)}</TableCell>
+                                        <TableCell className="text-right flex-1">
+                                            <span className={product.stock_qty <= product.min_stock_level ? "text-red-500 font-bold" : "text-green-500"}>
+                                                {product.stock_qty}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-right flex-1">
+                                            <div className="flex justify-end gap-2">
+                                                <Button variant="ghost" size="icon" onClick={() => handleOpenModal(product)}>
+                                                    <Edit className="w-4 h-4" />
+                                                </Button>
+                                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDelete(product.id)}>
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })
                         )}
                     </TableBody>
                 </Table>

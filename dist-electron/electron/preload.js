@@ -65,5 +65,9 @@ electron_1.contextBridge.exposeInMainWorld('electron', {
         get: () => electron_1.ipcRenderer.invoke('settings:get'),
         update: (settings) => electron_1.ipcRenderer.invoke('settings:update', settings),
     },
+    printer: {
+        getPrinters: () => electron_1.ipcRenderer.invoke('print:getPrinters'),
+        printReceipt: (data) => electron_1.ipcRenderer.invoke('print:receipt', data),
+    },
 });
 //# sourceMappingURL=preload.js.map

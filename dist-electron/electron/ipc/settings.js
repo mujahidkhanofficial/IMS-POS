@@ -13,40 +13,19 @@ function registerSettingsHandlers() {
     // Get Settings
     electron_1.ipcMain.handle('settings:get', () => {
         return (0, db_1.runQuery)(() => {
-            // Check if settings table exists, if not create it (or assume it exists from schema)
-            // For now, let's assume a simple key-value store or a single row table
-            // Let's use a single row table 'store_settings'
-            const settings = db.prepare('SELECT * FROM store_settings LIMIT 1').get();
-            if (!settings) {
-                // Return defaults
-                return {
-                    storeName: 'My Store',
-                    address: '',
-                    phone: '',
-                    taxRate: 0
-                };
-            }
-            return settings;
+            return db.prepare('SELECT * FROM settings').all();
         });
     });
     // Update Settings
-    electron_1.ipcMain.handle('settings:update', (_, settings) => {
+    electron_1.ipcMain.handle('settings:update', (_, { key, value }) => {
         return (0, db_1.runQuery)(() => {
-            const existing = db.prepare('SELECT id FROM store_settings LIMIT 1').get();
-            if (existing) {
-                db.prepare(`
-                    UPDATE store_settings 
-                    SET store_name = @storeName, address = @address, phone = @phone, tax_rate = @taxRate
-                    WHERE id = @id
-                `).run({ ...settings, id: existing.id });
-            }
-            else {
-                db.prepare(`
-                    INSERT INTO store_settings (store_name, address, phone, tax_rate)
-                    VALUES (@storeName, @address, @phone, @taxRate)
-                `).run(settings);
-            }
-            return true;
+            const stmt = db.prepare(`
+                INSERT INTO settings (key, value) 
+                VALUES (@key, @value) 
+                ON CONFLICT(key) DO UPDATE SET value = @value
+            `);
+            stmt.run({ key, value });
+            return { key, value };
         });
     });
     // Backup Manual

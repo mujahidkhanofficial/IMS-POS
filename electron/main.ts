@@ -5,11 +5,16 @@ import { registerProductHandlers } from './ipc/db.products';
 import { registerReportHandlers } from './ipc/db.reports';
 import { registerSettingsHandlers } from './ipc/settings';
 import { registerSupplierHandlers } from './ipc/db.suppliers';
-import { registerPrinterHandlers } from './ipc/printer';
 import { registerPurchaseHandlers } from './ipc/db.purchases';
+import { registerPrinterHandlers } from './ipc/printer';
 import { performBackup } from './backup';
 
+// Disable hardware acceleration to prevent potential rendering issues
+app.disableHardwareAcceleration();
 
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 
 let mainWindow: BrowserWindow | null = null;
 let licenseWindow: BrowserWindow | null = null;
@@ -78,25 +83,38 @@ function createLicenseWindow() {
 }
 
 app.whenReady().then(() => {
-    // Register DB Handlers
-    registerProductHandlers();
-    registerReportHandlers();
-    registerSettingsHandlers();
-    registerSupplierHandlers();
-    registerPurchaseHandlers();
-    registerPrinterHandlers();
+    console.log('App Ready. Registering handlers...');
+    try {
+        // Register DB Handlers
+        registerProductHandlers();
+        console.log('Product handlers registered.');
+        registerReportHandlers();
+        console.log('Report handlers registered.');
+        registerSettingsHandlers();
+        console.log('Settings handlers registered.');
+        registerSupplierHandlers();
+        console.log('Supplier handlers registered.');
+        registerPurchaseHandlers();
+        console.log('Purchase handlers registered.');
+        registerPrinterHandlers();
+        console.log('Printer handlers registered.');
 
-    // Check License
-    const stored = licenseManager.loadLicense();
-    let isValid = false;
-    if (stored?.key) {
-        isValid = licenseManager.validateKey(stored.key);
-    }
+        // Check License
+        console.log('Checking license...');
+        const stored = licenseManager.loadLicense();
+        let isValid = false;
+        if (stored?.key) {
+            isValid = licenseManager.validateKey(stored.key);
+        }
+        console.log('License check complete. Valid:', isValid);
 
-    if (isValid) {
-        createMainWindow();
-    } else {
-        createLicenseWindow();
+        if (isValid) {
+            createMainWindow();
+        } else {
+            createLicenseWindow();
+        }
+    } catch (error) {
+        console.error('CRITICAL ERROR during startup:', error);
     }
 });
 
@@ -165,8 +183,3 @@ app.on('activate', () => {
 // Misc IPC
 ipcMain.handle('get-app-version', () => app.getVersion());
 ipcMain.handle('backup:create', () => performBackup());
-ipcMain.handle('print:receipt', (_, data) => {
-    console.log('[Main] Printing receipt:', data);
-    // Placeholder: In the future, this will connect to a thermal printer
-    return { success: true, message: 'Receipt sent to printer (Simulation)' };
-});

@@ -11,9 +11,13 @@ const db_reports_1 = require("./ipc/db.reports");
 const settings_1 = require("./ipc/settings");
 const db_suppliers_1 = require("./ipc/db.suppliers");
 const db_purchases_1 = require("./ipc/db.purchases");
+const printer_1 = require("./ipc/printer");
 const backup_1 = require("./backup");
 // Disable hardware acceleration to prevent potential rendering issues
 electron_1.app.disableHardwareAcceleration();
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
 let mainWindow = null;
 let licenseWindow = null;
 const DIST = path_1.default.join(__dirname, '../../dist');
@@ -76,23 +80,38 @@ function createLicenseWindow() {
     });
 }
 electron_1.app.whenReady().then(() => {
-    // Register DB Handlers
-    (0, db_products_1.registerProductHandlers)();
-    (0, db_reports_1.registerReportHandlers)();
-    (0, settings_1.registerSettingsHandlers)();
-    (0, db_suppliers_1.registerSupplierHandlers)();
-    (0, db_purchases_1.registerPurchaseHandlers)();
-    // Check License
-    const stored = license_1.licenseManager.loadLicense();
-    let isValid = false;
-    if (stored?.key) {
-        isValid = license_1.licenseManager.validateKey(stored.key);
+    console.log('App Ready. Registering handlers...');
+    try {
+        // Register DB Handlers
+        (0, db_products_1.registerProductHandlers)();
+        console.log('Product handlers registered.');
+        (0, db_reports_1.registerReportHandlers)();
+        console.log('Report handlers registered.');
+        (0, settings_1.registerSettingsHandlers)();
+        console.log('Settings handlers registered.');
+        (0, db_suppliers_1.registerSupplierHandlers)();
+        console.log('Supplier handlers registered.');
+        (0, db_purchases_1.registerPurchaseHandlers)();
+        console.log('Purchase handlers registered.');
+        (0, printer_1.registerPrinterHandlers)();
+        console.log('Printer handlers registered.');
+        // Check License
+        console.log('Checking license...');
+        const stored = license_1.licenseManager.loadLicense();
+        let isValid = false;
+        if (stored?.key) {
+            isValid = license_1.licenseManager.validateKey(stored.key);
+        }
+        console.log('License check complete. Valid:', isValid);
+        if (isValid) {
+            createMainWindow();
+        }
+        else {
+            createLicenseWindow();
+        }
     }
-    if (isValid) {
-        createMainWindow();
-    }
-    else {
-        createLicenseWindow();
+    catch (error) {
+        console.error('CRITICAL ERROR during startup:', error);
     }
 });
 // License IPC
